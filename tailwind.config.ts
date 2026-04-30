@@ -13,6 +13,18 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Rajdhani', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      backgroundImage: {
+        'gradient-neon': 'var(--gradient-neon)',
+        'gradient-panel': 'var(--gradient-panel)',
+      },
+      boxShadow: {
+        neon: 'var(--shadow-neon)',
+        panel: 'var(--shadow-panel)',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -22,6 +34,12 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
+        },
+        risk: {
+          critical: "hsl(var(--risk-critical))",
+          high: "hsl(var(--risk-high))",
+          low: "hsl(var(--risk-low))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
