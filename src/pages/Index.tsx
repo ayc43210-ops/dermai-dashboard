@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Download, RotateCcw, Zap } from "lucide-react";
 import { TopBar } from "@/components/dermai/TopBar";
 import { UploadZone } from "@/components/dermai/UploadZone";
 import { ResultsPanel } from "@/components/dermai/ResultsPanel";
 import { ClinicalInsights } from "@/components/dermai/ClinicalInsights";
 import { DermSidebar } from "@/components/dermai/Sidebar";
-import { analyzeImage, type ScanResult } from "@/lib/mockApi";
+import { analyzeImage, checkBackend, API_URL, type ScanResult, type SessionScan } from "@/lib/api";
 import { downloadPdfReport } from "@/lib/pdfReport";
 import { toast } from "sonner";
 
@@ -13,6 +13,20 @@ const Index = () => {
   const [preview, setPreview] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
+  const [history, setHistory] = useState<SessionScan[]>([]);
+  const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
+
+  // Poll the backend health check so the status shown is real, not hardcoded.
+  useEffect(() => {
+    const controller = new AbortController();
+    const ping = async () => setBackendOnline(await checkBackend(controller.signal));
+    ping();
+    const timer = setInterval(ping, 10000);
+    return () => {
+      controller.abort();
+      clearInterval(timer);
+    };
+  }, []);
 
   const handleFile = async (file: File) => {
     const reader = new FileReader();
@@ -24,11 +38,24 @@ const Index = () => {
       try {
         const res = await analyzeImage(file);
         setResult(res);
+        setHistory((h) =>
+          [
+            {
+              id: res.id,
+              fileName: file.name,
+              classification: res.classification,
+              confidence: res.confidence,
+              risk: res.risk,
+              timestamp: res.timestamp,
+            },
+            ...h,
+          ].slice(0, 10),
+        );
         toast.success(`Scan complete: ${res.classification}`, {
           description: `${res.confidence.toFixed(1)}% confidence · ${res.risk} risk`,
         });
-      } catch {
-        toast.error("Analysis failed. Retry or check connection.");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Analysis failed. Retry or check connection.");
       } finally {
         setIsAnalyzing(false);
       }
@@ -48,7 +75,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <TopBar />
+      <TopBar backendOnline={backendOnline} />
 
       <main className="max-w-[1600px] mx-auto px-6 py-6">
         {/* Status bar */}
@@ -102,13 +129,16 @@ const Index = () => {
             <div className="flex items-center justify-between p-3 bg-card/50 border border-border rounded-sm text-xs font-mono">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Zap className="w-3.5 h-3.5 text-primary" />
-                <span>BACKEND: <span className="text-primary">FastAPI/predict</span> // mock active</span>
+                <span>
+                  BACKEND: <span className="text-primary">{API_URL}/predict</span> //{" "}
+                  {backendOnline === null ? "checking" : backendOnline ? "connected" : "unreachable"}
+                </span>
               </div>
-              <span className="text-muted-foreground">© DermAI Systems · Class IIa Medical Device</span>
+              <span className="text-muted-foreground">Research prototype · not a medical device</span>
             </div>
           </div>
 
-          <DermSidebar />
+          <DermSidebar history={history} />
         </div>
       </main>
     </div>

@@ -1,6 +1,10 @@
 import { Activity, Wifi, ShieldCheck } from "lucide-react";
 
-export function TopBar() {
+interface TopBarProps {
+  backendOnline: boolean | null;
+}
+
+export function TopBar({ backendOnline }: TopBarProps) {
   return (
     <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-20">
       <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
@@ -31,8 +35,18 @@ export function TopBar() {
 
         <div className="flex items-center gap-4 text-xs font-mono">
           <div className="flex items-center gap-1.5">
-            <Wifi className="w-3.5 h-3.5 text-risk-low" />
-            <span className="text-risk-low">ONLINE</span>
+            <Wifi
+              className={`w-3.5 h-3.5 ${
+                backendOnline === null ? "text-muted-foreground" : backendOnline ? "text-risk-low" : "text-risk-critical"
+              }`}
+            />
+            <span
+              className={
+                backendOnline === null ? "text-muted-foreground" : backendOnline ? "text-risk-low" : "text-risk-critical"
+              }
+            >
+              {backendOnline === null ? "CHECKING" : backendOnline ? "ONLINE" : "OFFLINE"}
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" />

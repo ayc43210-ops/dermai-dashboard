@@ -1,5 +1,5 @@
 import { Activity, AlertTriangle, ShieldCheck, ShieldAlert } from "lucide-react";
-import type { ScanResult, RiskLevel } from "@/lib/mockApi";
+import { MODEL_INFO, type ScanResult, type RiskLevel } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const RISK_STYLES: Record<RiskLevel, { color: string; ring: string; icon: typeof Activity; label: string }> = {
@@ -115,7 +115,7 @@ export function ResultsPanel({ result }: ResultsPanelProps) {
             </div>
             <div className="p-2 bg-muted/40 rounded-sm">
               <div className="label-tech">MODEL</div>
-              <div className="text-primary">v3.1.7</div>
+              <div className="text-primary">{MODEL_INFO.architecture}</div>
             </div>
           </div>
         </div>

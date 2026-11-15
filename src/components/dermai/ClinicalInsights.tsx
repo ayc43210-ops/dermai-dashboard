@@ -1,5 +1,5 @@
 import { ChevronRight, Stethoscope } from "lucide-react";
-import type { ScanResult } from "@/lib/mockApi";
+import type { ScanResult } from "@/lib/api";
 
 interface Props {
   result: ScanResult | null;
